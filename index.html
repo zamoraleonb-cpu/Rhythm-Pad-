@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,7 +10,7 @@
 :root {
   --fondo: #111315;
   --panel: #1d2023;
-  --boton: #292d31;
+  --boton: #25292d;
   --borde: #41474d;
   --texto: #f5f5f5;
   --suave: #aab0b6;
@@ -40,8 +39,8 @@ button, input {
 
 button {
   color: var(--texto);
-  border: 1px solid var(--borde);
   background: var(--boton);
+  border: 1px solid var(--borde);
   border-radius: 12px;
   cursor: pointer;
   touch-action: manipulation;
@@ -125,11 +124,11 @@ header {
 }
 
 .fill.active,
-.flash {
+.variation.flash {
   background: var(--naranja) !important;
-  color: #211306 !important;
-  border-color: #ffb65f !important;
-  box-shadow: 0 0 17px #ff941f88;
+  color: #241405 !important;
+  border-color: #ffc477 !important;
+  box-shadow: 0 0 18px #ff941f99 !important;
 }
 
 .panel {
@@ -176,12 +175,6 @@ header {
   letter-spacing: 2px;
 }
 
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--verde);
-  cursor: pointer;
-}
-
 .volume-row {
   display: flex;
   align-items: center;
@@ -192,6 +185,17 @@ input[type="range"] {
   font-size: 20px;
 }
 
+.volume-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--verde);
+  cursor: pointer;
+}
+
 .volume-value {
   width: 40px;
   text-align: right;
@@ -200,23 +204,31 @@ input[type="range"] {
   font-variant-numeric: tabular-nums;
 }
 
+.page-panel {
+  background: var(--panel);
+  border: 1px solid #30353a;
+  border-radius: 15px;
+  padding: 14px;
+}
+
 .page-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
   gap: 8px;
+  margin-bottom: 14px;
 }
 
 .page-name {
   font-size: 15px;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .page-counter {
   font-size: 11px;
   color: var(--suave);
+  white-space: nowrap;
 }
 
 .variations {
@@ -231,7 +243,7 @@ input[type="range"] {
   padding: 0;
   font-size: 26px;
   font-weight: 900;
-  background: #24282c;
+  background: var(--boton);
   border: 1px solid #454b51;
   position: relative;
   overflow: hidden;
@@ -258,38 +270,6 @@ input[type="range"] {
 
 .variation.flash {
   background: var(--naranja) !important;
-  color: #241405 !important;
-  border-color: #ffc477 !important;
-  box-shadow: 0 0 20px #ff941f99 !important;
-}
-
-.variation.flash::after {
-  background: white;
-  box-shadow: 0 0 8px white;
-}
-
-.empty-page {
-  min-height: 250px;
-  border: 1px dashed #454b51;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-align: center;
-  padding: 20px;
-  color: var(--suave);
-}
-
-.empty-page strong {
-  font-size: 18px;
-  color: #e4e7e9;
-}
-
-.empty-page span {
-  font-size: 12px;
-  line-height: 1.6;
 }
 
 .pager {
@@ -337,14 +317,25 @@ footer {
   font-size: 10px;
   letter-spacing: 1px;
   padding: 2px 0 8px;
-  margin-top: auto;
 }
 
 @media (max-height: 740px) {
-  .app { gap: 10px; padding: 10px; }
-  .panel { padding: 11px; }
-  .variation { height: 65px; }
-  .transport button { height: 53px; }
+  .app {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .panel, .page-panel {
+    padding: 11px;
+  }
+
+  .variation {
+    height: 65px;
+  }
+
+  .transport button {
+    height: 53px;
+  }
 }
 </style>
 </head>
@@ -361,8 +352,7 @@ footer {
   </header>
 
   <section class="transport">
-    <button class="play" id="playBtn" type="button"
-            aria-label="Iniciar reproducción">
+    <button class="play" id="playBtn" type="button">
       <span id="playIcon">▶</span>
       <span id="playText"> START</span>
     </button>
@@ -375,16 +365,14 @@ footer {
   <section class="panel">
     <div class="panel-title">TEMPO</div>
     <div class="tempo-row">
-      <button class="adjust" id="tempoDown" type="button"
-              aria-label="Disminuir tempo">−</button>
+      <button class="adjust" id="tempoDown" type="button">−</button>
 
       <div>
         <div class="tempo-number" id="tempoNumber">120</div>
         <div class="tempo-unit">BPM</div>
       </div>
 
-      <button class="adjust" id="tempoUp" type="button"
-              aria-label="Aumentar tempo">+</button>
+      <button class="adjust" id="tempoUp" type="button">+</button>
     </div>
   </section>
 
@@ -398,34 +386,27 @@ footer {
     </div>
   </section>
 
-  <section class="panel">
+  <!-- Las tres páginas reutilizan la misma cuadrícula -->
+  <section class="page-panel">
     <div class="page-heading">
-      <div class="page-name" id="pageTitle">VARIACIONES</div>
-      <div class="page-counter" id="pageCounter">PÁGINA 1 / 2</div>
+      <div class="page-name" id="pageTitle">INTROS</div>
+      <div class="page-counter" id="pageCounter">PÁGINA 1 / 3</div>
     </div>
 
-    <div id="variationPage">
-      <div class="variations" id="variationGrid">
-        <button class="variation" data-letter="A">A</button>
-        <button class="variation" data-letter="B">B</button>
-        <button class="variation" data-letter="C">C</button>
-        <button class="variation" data-letter="D">D</button>
-        <button class="variation" data-letter="E">E</button>
-        <button class="variation" data-letter="F">F</button>
-        <button class="variation" data-letter="G">G</button>
-        <button class="variation" data-letter="H">H</button>
-        <button class="variation" data-letter="I">I</button>
-      </div>
+    <div class="variations" id="buttonGrid">
+      <button class="variation" data-letter="A">A</button>
+      <button class="variation" data-letter="B">B</button>
+      <button class="variation" data-letter="C">C</button>
+      <button class="variation" data-letter="D">D</button>
+      <button class="variation" data-letter="E">E</button>
+      <button class="variation" data-letter="F">F</button>
+      <button class="variation" data-letter="G">G</button>
+      <button class="variation" data-letter="H">H</button>
+      <button class="variation" data-letter="I">I</button>
     </div>
-
-<div id="emptyPage" class="empty-page" hidden>
-  <strong>PRÓXIMAMENTE</strong>
-  <span>
-    Espacio reservado para nuevos patrones.
-  </span>
-</div>
   </section>
 
+  <!-- Navegación directamente debajo de los botones -->
   <section>
     <div class="pager">
       <button class="arrow" id="prevPage" type="button"
@@ -435,8 +416,9 @@ footer {
         <div class="page-dots">
           <span class="dot active" id="dot1"></span>
           <span class="dot" id="dot2"></span>
+          <span class="dot" id="dot3"></span>
         </div>
-        <div class="page-caption" id="pageCaption">RITMOS PRINCIPALES</div>
+        <div class="page-caption" id="pageCaption">INTROS</div>
       </div>
 
       <button class="arrow" id="nextPage" type="button"
@@ -445,20 +427,25 @@ footer {
   </section>
 
   <footer>RHYTHM PAD · PROTOTIPO SIN AUDIO</footer>
-
 </main>
 
 <script>
 (() => {
   "use strict";
 
-  // Estado general del controlador
+  const pages = ["INTROS", "VARIACIONES", "ENDINGS"];
+
+  let currentPage = 0;
   let isPlaying = false;
   let tempo = 120;
-  let currentPage = 0;
-  let selectedVariation = "A";
-  let flashTimer = null;
   let fillTimer = null;
+
+  // Cada página conserva su propia selección.
+  const selections = {
+    INTROS: "A",
+    VARIACIONES: "A",
+    ENDINGS: "A"
+  };
 
   const playBtn = document.getElementById("playBtn");
   const playIcon = document.getElementById("playIcon");
@@ -470,20 +457,65 @@ footer {
   const volumeValue = document.getElementById("volumeValue");
 
   const fillBtn = document.getElementById("fillBtn");
-  const variationButtons =
-    document.querySelectorAll(".variation");
+  const buttons = document.querySelectorAll(".variation");
 
-  const variationPage = document.getElementById("variationPage");
-  const emptyPage = document.getElementById("emptyPage");
   const pageTitle = document.getElementById("pageTitle");
   const pageCounter = document.getElementById("pageCounter");
   const pageCaption = document.getElementById("pageCaption");
 
-  const dot1 = document.getElementById("dot1");
-  const dot2 = document.getElementById("dot2");
+  const dots = [
+    document.getElementById("dot1"),
+    document.getElementById("dot2"),
+    document.getElementById("dot3")
+  ];
 
-  // Inicio / pausa
-  function updatePlayButton() {
+  function activePageName() {
+    return pages[currentPage];
+  }
+
+  function renderButtons() {
+    const selected = selections[activePageName()];
+
+    buttons.forEach(button => {
+      button.classList.toggle(
+        "selected",
+        button.dataset.letter === selected
+      );
+    });
+  }
+
+  function renderPage() {
+    const name = activePageName();
+
+    pageTitle.textContent = name;
+    pageCounter.textContent =
+      "PÁGINA " + (currentPage + 1) + " / " + pages.length;
+    pageCaption.textContent = name;
+
+    dots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === currentPage);
+    });
+
+    renderButtons();
+  }
+
+  function flashButton(button) {
+    button.classList.add("flash");
+
+    window.setTimeout(() => {
+      button.classList.remove("flash");
+    }, 180);
+  }
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      selections[activePageName()] = button.dataset.letter;
+      renderButtons();
+      flashButton(button);
+    });
+  });
+
+  function renderPlayState() {
     if (isPlaying) {
       playIcon.textContent = "Ⅱ";
       playText.textContent = " PAUSA";
@@ -503,58 +535,23 @@ footer {
 
   playBtn.addEventListener("click", () => {
     isPlaying = !isPlaying;
-    updatePlayButton();
+    renderPlayState();
   });
-
-  // Tempo: límites de 40 a 240 BPM
-  function updateTempo() {
-    tempoNumber.textContent = tempo;
-  }
 
   document.getElementById("tempoDown").addEventListener("click", () => {
     tempo = Math.max(40, tempo - 1);
-    updateTempo();
+    tempoNumber.textContent = tempo;
   });
 
   document.getElementById("tempoUp").addEventListener("click", () => {
     tempo = Math.min(240, tempo + 1);
-    updateTempo();
+    tempoNumber.textContent = tempo;
   });
 
-  // Volumen visual
   volume.addEventListener("input", () => {
     volumeValue.textContent = volume.value + "%";
   });
 
-  // Destello breve sin perder la selección verde
-  function flashButton(button) {
-    button.classList.add("flash");
-    window.setTimeout(() => {
-      button.classList.remove("flash");
-    }, 180);
-  }
-
-  // Seleccionar variaciones A-I
-  function selectVariation(letter, button) {
-    selectedVariation = letter;
-
-    variationButtons.forEach((item) => {
-      item.classList.toggle(
-        "selected",
-        item.dataset.letter === selectedVariation
-      );
-    });
-
-    flashButton(button);
-  }
-
-  variationButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      selectVariation(button.dataset.letter, button);
-    });
-  });
-
-  // BREAK / FILL: destello naranja temporal
   fillBtn.addEventListener("click", () => {
     fillBtn.classList.add("active");
     window.clearTimeout(fillTimer);
@@ -564,30 +561,9 @@ footer {
     }, 300);
   });
 
-  // Navegación entre las páginas A y B
-  function renderPage() {
-    const isFirstPage = currentPage === 0;
-
-    variationPage.hidden = !isFirstPage;
-    emptyPage.hidden = isFirstPage;
-
-    pageTitle.textContent = isFirstPage
-      ? "VARIACIONES"
-      : "OTROS PATRONES";
-
-    pageCounter.textContent =
-      "PÁGINA " + (currentPage + 1) + " / 2";
-
-    pageCaption.textContent = isFirstPage
-      ? "RITMOS PRINCIPALES"
-      : "INTROS Y FINALES · PRÓXIMAMENTE";
-
-    dot1.classList.toggle("active", isFirstPage);
-    dot2.classList.toggle("active", !isFirstPage);
-  }
-
   function changePage(direction) {
-    currentPage = (currentPage + direction + 2) % 2;
+    currentPage =
+      (currentPage + direction + pages.length) % pages.length;
     renderPage();
   }
 
@@ -599,16 +575,8 @@ footer {
     changePage(1);
   });
 
-  // Estado inicial
-  updateTempo();
-  updatePlayButton();
   renderPage();
-
-  // Selección inicial: A
-  const initialButton = document.querySelector('[data-letter="A"]');
-  if (initialButton) {
-    initialButton.classList.add("selected");
-  }
+  renderPlayState();
 })();
 </script>
 </body>
