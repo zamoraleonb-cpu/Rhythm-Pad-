@@ -1,0 +1,616 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111315">
+<title>Rhythm Pad</title>
+
+<style>
+:root {
+  --fondo: #111315;
+  --panel: #1d2023;
+  --boton: #292d31;
+  --borde: #41474d;
+  --texto: #f5f5f5;
+  --suave: #aab0b6;
+  --verde: #19c878;
+  --naranja: #ff941f;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  background: var(--boton);
+  border-radius: 12px;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: background .12s, border-color .12s,
+              box-shadow .12s, transform .12s;
+}
+
+button:active {
+  transform: scale(.96);
+}
+
+button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.app {
+  width: 100%;
+  max-width: 460px;
+  min-height: 100vh;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  color: var(--suave);
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.status {
+  color: var(--suave);
+  background: #24282c;
+  padding: 7px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.transport {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.transport button {
+  min-width: 0;
+  height: 60px;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.play {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: #071b10;
+}
+
+.play.running {
+  background: #154d36;
+  color: white;
+  border-color: var(--verde);
+  box-shadow: 0 0 13px #19c87855;
+}
+
+.fill.active,
+.flash {
+  background: var(--naranja) !important;
+  color: #211306 !important;
+  border-color: #ffb65f !important;
+  box-shadow: 0 0 17px #ff941f88;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #30353a;
+  border-radius: 15px;
+  padding: 14px;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--suave);
+  letter-spacing: 1.7px;
+  margin-bottom: 12px;
+}
+
+.tempo-row {
+  display: grid;
+  grid-template-columns: 58px 1fr 58px;
+  align-items: center;
+  gap: 10px;
+}
+
+.adjust {
+  height: 48px;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.tempo-number {
+  text-align: center;
+  font-size: 35px;
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.tempo-unit {
+  text-align: center;
+  color: var(--suave);
+  font-size: 11px;
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--verde);
+  cursor: pointer;
+}
+
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.volume-icon {
+  font-size: 20px;
+}
+
+.volume-value {
+  width: 40px;
+  text-align: right;
+  color: var(--suave);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.page-name {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.page-counter {
+  font-size: 11px;
+  color: var(--suave);
+}
+
+.variations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.variation {
+  width: 100%;
+  height: 78px;
+  padding: 0;
+  font-size: 26px;
+  font-weight: 900;
+  background: #24282c;
+  border: 1px solid #454b51;
+  position: relative;
+  overflow: hidden;
+}
+
+.variation.selected {
+  background: #124d35;
+  border: 2px solid var(--verde);
+  color: #65ffb5;
+  box-shadow: inset 0 0 12px #19c87818;
+}
+
+.variation.selected::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--verde);
+  border-radius: 50%;
+  right: 8px;
+  top: 8px;
+  box-shadow: 0 0 8px var(--verde);
+}
+
+.variation.flash {
+  background: var(--naranja) !important;
+  color: #241405 !important;
+  border-color: #ffc477 !important;
+  box-shadow: 0 0 20px #ff941f99 !important;
+}
+
+.variation.flash::after {
+  background: white;
+  box-shadow: 0 0 8px white;
+}
+
+.empty-page {
+  min-height: 250px;
+  border: 1px dashed #454b51;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 20px;
+  color: var(--suave);
+}
+
+.empty-page strong {
+  font-size: 18px;
+  color: #e4e7e9;
+}
+
+.empty-page span {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.pager {
+  display: grid;
+  grid-template-columns: 58px 1fr 58px;
+  align-items: center;
+  gap: 10px;
+}
+
+.arrow {
+  height: 48px;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.page-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #555b61;
+}
+
+.dot.active {
+  background: var(--verde);
+  box-shadow: 0 0 8px #19c87888;
+}
+
+.page-caption {
+  text-align: center;
+  color: var(--suave);
+  font-size: 11px;
+  margin-top: 7px;
+}
+
+footer {
+  text-align: center;
+  color: #777f86;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 2px 0 8px;
+  margin-top: auto;
+}
+
+@media (max-height: 740px) {
+  .app { gap: 10px; padding: 10px; }
+  .panel { padding: 11px; }
+  .variation { height: 65px; }
+  .transport button { height: 53px; }
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+  <header>
+    <div>
+      <div class="logo">RHYTHM PAD</div>
+      <div class="subtitle">RHYTHM CONTROLLER</div>
+    </div>
+    <div class="status" id="status">● DETENIDO</div>
+  </header>
+
+  <section class="transport">
+    <button class="play" id="playBtn" type="button"
+            aria-label="Iniciar reproducción">
+      <span id="playIcon">▶</span>
+      <span id="playText"> START</span>
+    </button>
+
+    <button class="fill" id="fillBtn" type="button">
+      ↯ BREAK / FILL
+    </button>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">TEMPO</div>
+    <div class="tempo-row">
+      <button class="adjust" id="tempoDown" type="button"
+              aria-label="Disminuir tempo">−</button>
+
+      <div>
+        <div class="tempo-number" id="tempoNumber">120</div>
+        <div class="tempo-unit">BPM</div>
+      </div>
+
+      <button class="adjust" id="tempoUp" type="button"
+              aria-label="Aumentar tempo">+</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">VOLUMEN</div>
+    <div class="volume-row">
+      <span class="volume-icon">🔊</span>
+      <input id="volume" type="range" min="0" max="100"
+             value="80" aria-label="Volumen">
+      <span class="volume-value" id="volumeValue">80%</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="page-heading">
+      <div class="page-name" id="pageTitle">VARIACIONES</div>
+      <div class="page-counter" id="pageCounter">PÁGINA 1 / 2</div>
+    </div>
+
+    <div id="variationPage">
+      <div class="variations" id="variationGrid">
+        <button class="variation" data-letter="A">A</button>
+        <button class="variation" data-letter="B">B</button>
+        <button class="variation" data-letter="C">C</button>
+        <button class="variation" data-letter="D">D</button>
+        <button class="variation" data-letter="E">E</button>
+        <button class="variation" data-letter="F">F</button>
+        <button class="variation" data-letter="G">G</button>
+        <button class="variation" data-letter="H">H</button>
+        <button class="variation" data-letter="I">I</button>
+      </div>
+    </div>
+
+    <div id="emptyPage" class="empty-page" hidden>
+      <strong>PÁGINA B</strong>
+      <span>
+        Espacio reservado para intros, finales y otros patrones.<br>
+        Esta página está vacía por ahora.
+      </span>
+    </div>
+  </section>
+
+  <section>
+    <div class="pager">
+      <button class="arrow" id="prevPage" type="button"
+              aria-label="Página anterior">‹</button>
+
+      <div>
+        <div class="page-dots">
+          <span class="dot active" id="dot1"></span>
+          <span class="dot" id="dot2"></span>
+        </div>
+        <div class="page-caption" id="pageCaption">RITMOS PRINCIPALES</div>
+      </div>
+
+      <button class="arrow" id="nextPage" type="button"
+              aria-label="Página siguiente">›</button>
+    </div>
+  </section>
+
+  <footer>RHYTHM PAD · PROTOTIPO SIN AUDIO</footer>
+
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // Estado general del controlador
+  let isPlaying = false;
+  let tempo = 120;
+  let currentPage = 0;
+  let selectedVariation = "A";
+  let flashTimer = null;
+  let fillTimer = null;
+
+  const playBtn = document.getElementById("playBtn");
+  const playIcon = document.getElementById("playIcon");
+  const playText = document.getElementById("playText");
+  const status = document.getElementById("status");
+
+  const tempoNumber = document.getElementById("tempoNumber");
+  const volume = document.getElementById("volume");
+  const volumeValue = document.getElementById("volumeValue");
+
+  const fillBtn = document.getElementById("fillBtn");
+  const variationButtons =
+    document.querySelectorAll(".variation");
+
+  const variationPage = document.getElementById("variationPage");
+  const emptyPage = document.getElementById("emptyPage");
+  const pageTitle = document.getElementById("pageTitle");
+  const pageCounter = document.getElementById("pageCounter");
+  const pageCaption = document.getElementById("pageCaption");
+
+  const dot1 = document.getElementById("dot1");
+  const dot2 = document.getElementById("dot2");
+
+  // Inicio / pausa
+  function updatePlayButton() {
+    if (isPlaying) {
+      playIcon.textContent = "Ⅱ";
+      playText.textContent = " PAUSA";
+      playBtn.classList.add("running");
+      playBtn.setAttribute("aria-label", "Pausar reproducción");
+      status.textContent = "● REPRODUCIENDO";
+      status.style.color = "#19c878";
+    } else {
+      playIcon.textContent = "▶";
+      playText.textContent = " START";
+      playBtn.classList.remove("running");
+      playBtn.setAttribute("aria-label", "Iniciar reproducción");
+      status.textContent = "● DETENIDO";
+      status.style.color = "";
+    }
+  }
+
+  playBtn.addEventListener("click", () => {
+    isPlaying = !isPlaying;
+    updatePlayButton();
+  });
+
+  // Tempo: límites de 40 a 240 BPM
+  function updateTempo() {
+    tempoNumber.textContent = tempo;
+  }
+
+  document.getElementById("tempoDown").addEventListener("click", () => {
+    tempo = Math.max(40, tempo - 1);
+    updateTempo();
+  });
+
+  document.getElementById("tempoUp").addEventListener("click", () => {
+    tempo = Math.min(240, tempo + 1);
+    updateTempo();
+  });
+
+  // Volumen visual
+  volume.addEventListener("input", () => {
+    volumeValue.textContent = volume.value + "%";
+  });
+
+  // Destello breve sin perder la selección verde
+  function flashButton(button) {
+    button.classList.add("flash");
+    window.setTimeout(() => {
+      button.classList.remove("flash");
+    }, 180);
+  }
+
+  // Seleccionar variaciones A-I
+  function selectVariation(letter, button) {
+    selectedVariation = letter;
+
+    variationButtons.forEach((item) => {
+      item.classList.toggle(
+        "selected",
+        item.dataset.letter === selectedVariation
+      );
+    });
+
+    flashButton(button);
+  }
+
+  variationButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      selectVariation(button.dataset.letter, button);
+    });
+  });
+
+  // BREAK / FILL: destello naranja temporal
+  fillBtn.addEventListener("click", () => {
+    fillBtn.classList.add("active");
+    window.clearTimeout(fillTimer);
+
+    fillTimer = window.setTimeout(() => {
+      fillBtn.classList.remove("active");
+    }, 300);
+  });
+
+  // Navegación entre las páginas A y B
+  function renderPage() {
+    const isFirstPage = currentPage === 0;
+
+    variationPage.hidden = !isFirstPage;
+    emptyPage.hidden = isFirstPage;
+
+    pageTitle.textContent = isFirstPage
+      ? "VARIACIONES"
+      : "OTROS PATRONES";
+
+    pageCounter.textContent =
+      "PÁGINA " + (currentPage + 1) + " / 2";
+
+    pageCaption.textContent = isFirstPage
+      ? "RITMOS PRINCIPALES"
+      : "INTROS Y FINALES · PRÓXIMAMENTE";
+
+    dot1.classList.toggle("active", isFirstPage);
+    dot2.classList.toggle("active", !isFirstPage);
+  }
+
+  function changePage(direction) {
+    currentPage = (currentPage + direction + 2) % 2;
+    renderPage();
+  }
+
+  document.getElementById("prevPage").addEventListener("click", () => {
+    changePage(-1);
+  });
+
+  document.getElementById("nextPage").addEventListener("click", () => {
+    changePage(1);
+  });
+
+  // Estado inicial
+  updateTempo();
+  updatePlayButton();
+  renderPage();
+
+  // Selección inicial: A
+  const initialButton = document.querySelector('[data-letter="A"]');
+  if (initialButton) {
+    initialButton.classList.add("selected");
+  }
+})();
+</script>
+</body>
+</html>
